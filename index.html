@@ -10,6 +10,7 @@
 </head>
 
 <body>
+    <div id="nodeContent"></div>
     <div id="netchart"></div>
 </body>
 
@@ -82,6 +83,12 @@
                     image: checkImage(element.key),
                     items: checkHitId(element),
                 },
+                details:{
+                    value: element.value,
+                    label: element.label,
+                    weight: element.weight,
+                    connectionNode: element.connectionNode
+                },
                 loaded: true
             })
         });;
@@ -110,9 +117,29 @@
                     links: links
                 }
             },
+            events:{
+                onClick: graphClick
+            },
             interaction: { selection: { lockNodesOnMove: false } }
         });
     }
     getJson();
+    function graphClick(event){
+        event.preventDefault();
+        console.log(event);
+        let display = event.clickNode.label[0];
+        if(event.clickNode.label[0] === '.'){
+            display = event.clickNode.data.details.value;
+        }
+        document.getElementById('nodeContent').innerHTML = `
+        <h2> You have clicked for details of ${display}</h2>
+        <ul>
+        <li> Value: ${event.clickNode.data.details.value}</li>
+        <li> Label: ${event.clickNode.data.details.label}</li>
+        <li> Weight: ${event.clickNode.data.details.weight}</li>
+        <li> Connection Node: ${event.clickNode.data.details.connectionNode}</li>
+        </ul>
+        `;
+    }
 
 </script>
