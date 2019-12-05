@@ -31,11 +31,25 @@
         arrivalDateTimeMillis: 'https://img.icons8.com/nolan/64/000000/airplane-take-off.png',
         serviceKey: 'https://img.icons8.com/nolan/64/000000/time.png',
     }
+    let classFlag = {
+        personId: 'Person',
+        arrivalDateTimeMillis: 'Flight',
+        serviceKey: 'Service',
+    }
     checkImage = (key) => {
         let imageVal;
         Object.keys(imageFlag).forEach(val => {
             if (key.includes(val)) {
                 imageVal = imageFlag[val];
+            }
+        })
+        return imageVal;
+    }
+    checkClassName = (key) => {
+        let imageVal;
+        Object.keys(classFlag).forEach(val => {
+            if (key.includes(val)) {
+                imageVal = classFlag[val];
             }
         })
         return imageVal;
@@ -78,12 +92,13 @@
             }
             nodes.push({
                 id: index,
+                className: checkClassName(element.key),
                 style: {
                     label: label,
                     image: checkImage(element.key),
                     items: checkHitId(element),
                 },
-                details:{
+                details: {
                     value: element.value,
                     label: element.label,
                     weight: element.weight,
@@ -104,31 +119,32 @@
         var nc = new NetChart({
             container: document.getElementById("netchart"),
             area: { height: 500 },
-            /*  style: {
-                 nodeClasses: [
-                     { className: "classA", style: { fillColor: "rgba(28,124,213,1)", lineColor: "blue" } },
-                     { className: "classB", style: { image: 'https://img.icons8.com/flat_round/64/000000/error--v1.png', imageCropping: 'letterbox'} },
-                     { className: "classX", style: { fillColor: "orange", radius: 45, lineDash: [3, 3] } }
-                 ]
-             }, */
             data: {
                 preloaded: {
                     nodes: nodes,
                     links: links
                 }
             },
-            events:{
+            legend: { enabled: true },
+            style: {
+                nodeClasses: [
+                    { className: "Person", displayName: "Display name of class A", style: { radius: 20, fillColor: "rgba(28,124,213,0.8)", lineColor: "blue" } },
+                    { className: "Flight", style: { fillColor: "rgba(47,195,47,1)", radius: 45, lineWidth: 2, lineColor: "rgba(176,220,11,0.7)"} },
+                    { className: "Service", style: { fillColor: "orange", radius: 45, lineWidth: 2, lineColor: "black" } },
+                ],
+            },
+            events: {
                 onClick: graphClick
             },
             interaction: { selection: { lockNodesOnMove: false } }
         });
     }
     getJson();
-    function graphClick(event){
+    function graphClick(event) {
         event.preventDefault();
         console.log(event);
         let display = event.clickNode.label[0];
-        if(event.clickNode.label[0] === '.'){
+        if (event.clickNode.label[0] === '.') {
             display = event.clickNode.data.details.value;
         }
         document.getElementById('nodeContent').innerHTML = `
