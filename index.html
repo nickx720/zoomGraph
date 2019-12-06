@@ -11,6 +11,13 @@
 
 <body>
     <div id="nodeContent"></div>
+    <div id="dropDown">
+        <select name="pets" id="pet-select" onchange="updateGraph(event)">
+            <option value="">--Please choose an option--</option>
+            <option value="ARRIVED_AT">ARRIVED_AT</option>
+            <option value="TRAVELLED_ON_FLIGHT">TRAVELLED_ON_FLIGHT</option>
+        </select>
+    </div>
     <div id="netchart"></div>
 </body>
 
@@ -26,6 +33,8 @@
         "fe0ea4500e93ad3cecf4ed17af78e211dd18acd7b1b8e197db5498ef3f0bd0020569e477022d7";
 </script>
 <script>
+    let criteria = null;
+    var nc = 0;
     let imageFlag = {
         personId: 'https://img.icons8.com/nolan/64/000000/person-male.png',
         arrivalDateTimeMillis: 'https://img.icons8.com/nolan/64/000000/airplane-take-off.png',
@@ -110,9 +119,8 @@
                 }
             })
         })
-        console.log(nodes);
-        console.log(links);
-        var nc = new NetChart({
+
+        nc = new NetChart({
             container: document.getElementById("netchart"),
             area: { height: 500 },
             data: {
@@ -138,9 +146,6 @@
 						</div>`;
                 },
                 linkContentsFunction: function (itemData, item) {
-                    console.log(itemData);
-                    console.log(nodes[itemData.from])
-                    console.log(nodes[itemData.to])
                     return `
                     <div>
                     <p style="padding-left:5px;padding-right:5px;">${nodes[itemData.from].style.label[0]} is connected by ${itemData.details.relationship} to ${nodes[itemData.to].details.value}</p>
@@ -148,26 +153,23 @@
                     `
                 }
             },
+            filters: {
+                linkFilter: linkFilter
+            },
             interaction: { selection: { lockNodesOnMove: true } }
         });
     }
     getJson();
-    /* function nodeHover(itemData,item) {
-        event.preventDefault();
-        console.log(itemData, item);
-        let display = event.clickNode.label[0];
-        if (event.clickNode.label[0] === '.') {
-            display = event.clickNode.data.details.value;
+    function linkFilter(linkData){
+        if(criteria != null){
+            return linkData.details.relationship == criteria;
+        } else {
+            return linkData
         }
-        document.getElementById('nodeContent').innerHTML = `
-        <h2> You have clicked for details of ${display}</h2>
-        <ul>
-        <li> Value: ${event.clickNode.data.details.value}</li>
-        <li> Label: ${event.clickNode.data.details.label}</li>
-        <li> Weight: ${event.clickNode.data.details.weight}</li>
-        <li> Connection Node: ${event.clickNode.data.details.connectionNode}</li>
-        </ul>
-        `;
-    } */
+    }
+    function updateGraph(e){
+        criteria = e.target.value;
+        nc.updateFilters();
+    }
 
 </script>
