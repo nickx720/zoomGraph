@@ -10,6 +10,7 @@
 </head>
 
 <body>
+    <div id="nodeContent"></div>
     <div id="netchart"></div>
 </body>
 
@@ -30,6 +31,11 @@
         arrivalDateTimeMillis: 'https://img.icons8.com/nolan/64/000000/airplane-take-off.png',
         serviceKey: 'https://img.icons8.com/nolan/64/000000/time.png',
     }
+    let classFlag = {
+        personId: 'Person',
+        arrivalDateTimeMillis: 'Flight',
+        serviceKey: 'Service',
+    }
     checkImage = (key) => {
         let imageVal;
         Object.keys(imageFlag).forEach(val => {
@@ -42,7 +48,7 @@
     checkHitId = (node) => {
         let items = [];
         if (node.properties.hasOwnProperty('hitId')) {
-            if (node.properties.hitId.length > 0) {
+            if (node.properties.hitId.length > 1) {
                 items.push({
                     text: '!',
                     aspectRatio: 0, //force single line
@@ -59,22 +65,12 @@
         }
         return items;
     }
-    checkGroup= (node, connections) => {
-        if(connections.includes(node)){
-           return 'Group1'
-        }
-        else {
-            return ''
-        }
-    }
     async function getJson() {
         const response = await fetch('https://api.myjson.com/bins/fquo4');
         const myJson = await response.json();
         console.log(myJson);
         let nodes = [];
         let links = [];
-        let connections = myJson.combos[0];
-        console.log(connections);
         myJson.nodes.forEach((element, index) => {
             let label;
             if (element.properties.hasOwnProperty('fullName')) {
@@ -91,7 +87,13 @@
                     label: label,
                     image: checkImage(element.key),
                     items: checkHitId(element),
-                    aura: checkGroup(index, connections)
+                },
+                details: {
+                    value: element.value,
+                    label: element.label,
+                    weight: element.weight,
+                    connectionNode: element.connectionNode,
+                    key: element.key
                 },
                 loaded: true
             })
@@ -101,6 +103,11 @@
                 id: element.indices,
                 from: element.sourceIdx,
                 to: element.targetIdx,
+                details:{
+                    key: element.key,
+                    relationship: element.relationshipCode,
+                    score: element.score,
+                }
             })
         })
         console.log(nodes);
@@ -114,14 +121,53 @@
                     links: links
                 }
             },
-            interaction: { selection: { lockNodesOnMove: false } },
-            events: {
-                onClick: clickEvent,
-            }
+            info: {
+                enabled: true,
+                nodeContentsFunction: function (itemData, item) {
+                    let label;
+                    if (itemData.details.label.includes('person')) {
+                        label = itemData.style.label[0]
+                    } else {
+                        label = itemData.details.label;
+                    }
+                    return `<div style="margin:auto; width:auto; height:100%; padding': 10px;">
+						<h3 style="font-weight: 300; font-size: 21px; color: #2f256e; padding-bottom: 3px; margin:0px">${label}</h3>
+						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">Weight: ${itemData.details.weight}</p>
+						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">ConnectionNode: ${itemData.details.connectionNode}</p>
+						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">Key: ${itemData.details.key}</p>
+						</div>`;
+                },
+                linkContentsFunction: function (itemData, item) {
+                    console.log(itemData);
+                    console.log(nodes[itemData.from])
+                    console.log(nodes[itemData.to])
+                    return `
+                    <div>
+                    <p style="padding-left:5px;padding-right:5px;">${nodes[itemData.from].style.label[0]} is connected by ${itemData.details.relationship} to ${nodes[itemData.to].details.value}</p>
+                    </div>
+                    `
+                }
+            },
+            interaction: { selection: { lockNodesOnMove: true } }
         });
     }
     getJson();
-    function clickEvent(event) {
-        console.log("Click", event);
-    }
+    /* function nodeHover(itemData,item) {
+        event.preventDefault();
+        console.log(itemData, item);
+        let display = event.clickNode.label[0];
+        if (event.clickNode.label[0] === '.') {
+            display = event.clickNode.data.details.value;
+        }
+        document.getElementById('nodeContent').innerHTML = `
+        <h2> You have clicked for details of ${display}</h2>
+        <ul>
+        <li> Value: ${event.clickNode.data.details.value}</li>
+        <li> Label: ${event.clickNode.data.details.label}</li>
+        <li> Weight: ${event.clickNode.data.details.weight}</li>
+        <li> Connection Node: ${event.clickNode.data.details.connectionNode}</li>
+        </ul>
+        `;
+    } */
+
 </script>
