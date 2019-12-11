@@ -5,20 +5,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>V1</title>
+    <title>Testing Tool</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.8.0/css/bulma.min.css">
     <script src="https://cdn.zoomcharts-cloud.com/1/latest/zoomcharts.js" type="text/javascript"></script>
 </head>
 
 <body>
-    <div id="nodeContent"></div>
-    <div id="dropDown">
-        <select name="pets" id="pet-select" onchange="updateGraph(event)">
-            <option value="">--Please choose an option--</option>
-            <option value="ARRIVED_AT">ARRIVED_AT</option>
-            <option value="TRAVELLED_ON_FLIGHT">TRAVELLED_ON_FLIGHT</option>
-        </select>
+    <div class="columns">
+        <div class="column">
+            <div id="nodeContent"></div>
+        </div>
+        <div class="column">
+            <div id="netchart"></div>
+        </div>
     </div>
-    <div id="netchart"></div>
 </body>
 
 </html>
@@ -34,6 +34,7 @@
 </script>
 <script>
     let criteria = null;
+    let nodesView = [];
     var nc = 0;
     let imageFlag = {
         personId: 'https://img.icons8.com/nolan/64/000000/person-male.png',
@@ -106,13 +107,14 @@
                 },
                 loaded: true
             })
-        });;
+        });
+        nodesView.push(...nodes);
         myJson.connections.forEach(element => {
             links.push({
                 id: element.indices,
                 from: element.sourceIdx,
                 to: element.targetIdx,
-                details:{
+                details: {
                     key: element.key,
                     relationship: element.relationshipCode,
                     score: element.score,
@@ -123,6 +125,10 @@
         nc = new NetChart({
             container: document.getElementById("netchart"),
             area: { height: 500 },
+            advanced: {
+                crossOriginHeader: 'anonymous',
+                assets: ['https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css']
+            },
             data: {
                 preloaded: {
                     nodes: nodes,
@@ -130,46 +136,16 @@
                 }
             },
             info: {
-                enabled: true,
-                nodeContentsFunction: function (itemData, item) {
-                    let label;
-                    if (itemData.details.label.includes('person')) {
-                        label = itemData.style.label[0]
-                    } else {
-                        label = itemData.details.label;
-                    }
-                    return `<div style="margin:auto; width:auto; height:100%; padding': 10px;">
-						<h3 style="font-weight: 300; font-size: 21px; color: #2f256e; padding-bottom: 3px; margin:0px">${label}</h3>
-						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">Weight: ${itemData.details.weight}</p>
-						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">ConnectionNode: ${itemData.details.connectionNode}</p>
-						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">Key: ${itemData.details.key}</p>
-						</div>`;
-                },
-                linkContentsFunction: function (itemData, item) {
-                    return `
-                    <div>
-                    <p style="padding-left:5px;padding-right:5px;">${nodes[itemData.from].style.label[0]} is connected by ${itemData.details.relationship} to ${nodes[itemData.to].details.value}</p>
-                    </div>
-                    `
-                }
+                enabled: false,
             },
-            filters: {
-                linkFilter: linkFilter
+            toolbar: {
+                export: true,
+                exportOptions: ['jpg']
             },
             interaction: { selection: { lockNodesOnMove: true } }
         });
     }
     getJson();
-    function linkFilter(linkData){
-        if(criteria != null){
-            return linkData.details.relationship == criteria;
-        } else {
-            return linkData
-        }
-    }
-    function updateGraph(e){
-        criteria = e.target.value;
-        nc.updateFilters();
-    }
+  
 
 </script>
