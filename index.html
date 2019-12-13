@@ -11,13 +11,6 @@
 
 <body>
     <div id="nodeContent"></div>
-    <div id="dropDown">
-        <select name="pets" id="pet-select" onchange="updateGraph(event)">
-            <option value="">--Please choose an option--</option>
-            <option value="ARRIVED_AT">ARRIVED_AT</option>
-            <option value="TRAVELLED_ON_FLIGHT">TRAVELLED_ON_FLIGHT</option>
-        </select>
-    </div>
     <div id="netchart"></div>
 </body>
 
@@ -112,7 +105,7 @@
                 id: element.indices,
                 from: element.sourceIdx,
                 to: element.targetIdx,
-                details:{
+                details: {
                     key: element.key,
                     relationship: element.relationshipCode,
                     score: element.score,
@@ -129,47 +122,57 @@
                     links: links
                 }
             },
-            info: {
-                enabled: true,
-                nodeContentsFunction: function (itemData, item) {
-                    let label;
-                    if (itemData.details.label.includes('person')) {
-                        label = itemData.style.label[0]
-                    } else {
-                        label = itemData.details.label;
-                    }
-                    return `<div style="margin:auto; width:auto; height:100%; padding': 10px;">
-						<h3 style="font-weight: 300; font-size: 21px; color: #2f256e; padding-bottom: 3px; margin:0px">${label}</h3>
-						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">Weight: ${itemData.details.weight}</p>
-						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">ConnectionNode: ${itemData.details.connectionNode}</p>
-						<p style="font-size: 13px;font-family: Arial, Helvetica, sans-serif;font-weight: 300;padding:5px">Key: ${itemData.details.key}</p>
-						</div>`;
-                },
-                linkContentsFunction: function (itemData, item) {
-                    return `
-                    <div>
-                    <p style="padding-left:5px;padding-right:5px;">${nodes[itemData.from].style.label[0]} is connected by ${itemData.details.relationship} to ${nodes[itemData.to].details.value}</p>
-                    </div>
-                    `
-                }
+            style: {
+                linkStyleFunction: linkStyle
             },
-            filters: {
-                linkFilter: linkFilter
+            advanced: {
+                crossOriginHeader: 'anonymous',
+                assets: ['https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css']
+
             },
-            interaction: { selection: { lockNodesOnMove: true } }
+            toolbar: {
+                export: true,
+                exportOptions: 'jpg'
+            },
+            interaction: {
+                selection: { lockNodesOnMove: true }
+            }
         });
     }
     getJson();
-    function linkFilter(linkData){
-        if(criteria != null){
-            return linkData.details.relationship == criteria;
+    function linkStyle(link) {
+        console.log(link);
+        if (link.data.details.relationship === 'ARRIVED_AT') {
+
+            image = 'https://img.icons8.com/nolan/64/000000/airplane-take-off.png'
         } else {
-            return linkData
+            image = 'https://img.icons8.com/nolan/64/000000/time.png'
         }
-    }
-    function updateGraph(e){
-        criteria = e.target.value;
-        nc.updateFilters();
+        link.items = [
+            {   // Default item places just as the regular label.
+                text: '',
+                padding: 2,
+                backgroundStyle: {
+                    fillColor: "rgba(86,185,247,1)",
+                    lineColor: "rgba(86,185,247,0.4)"
+                },
+                textStyle: {
+                    fillColor: "white"
+                }
+            },
+            {
+                // add a star at the source node
+                image: image,
+                /* imageSlicing: [0, 0, 16, 16], */
+                /* px: -1, py: 0, lx: 8, ly: 0 */
+            },
+            /*    {
+                   // add a star at the target node
+                   image: "https://zoomcharts.com/dvsl/data/net-chart/icons.png",
+                   imageSlicing: [0, 0, 16, 16],
+                   px: 1, py: 0, lx: -8, ly: 0
+               } */
+        ]
     }
 
 </script>
