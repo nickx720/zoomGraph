@@ -54,119 +54,159 @@
     function loadGraph() {
         console.log(JSON.parse(textarea.value));
         let criteria = null;
-    let nodesView = [];
-    var nc = 0;
-    let imageFlag = {
-        personId: 'https://img.icons8.com/nolan/64/000000/person-male.png',
-        arrivalDateTimeMillis: 'https://img.icons8.com/nolan/64/000000/airplane-take-off.png',
-        serviceKey: 'https://img.icons8.com/nolan/64/000000/time.png',
-    }
-    let classFlag = {
-        personId: 'Person',
-        arrivalDateTimeMillis: 'Flight',
-        serviceKey: 'Service',
-    }
-    checkImage = (key) => {
-        let imageVal;
-        Object.keys(imageFlag).forEach(val => {
-            if (key.includes(val)) {
-                imageVal = imageFlag[val];
-            }
-        })
-        return imageVal;
-    }
-    checkHitId = (node) => {
-        let items = [];
-        if (node.properties.hasOwnProperty('hitId')) {
-            if (node.properties.hitId.length > 1) {
-                items.push({
-                    text: '!',
-                    aspectRatio: 0, //force single line
-                    px: 0, py: -1, x: 0, y: -5,
-                    textStyle: { fillColor: "white" },
-                    backgroundStyle: {
-                        fillColor: "red",
-                        lineColor: "transparent",
-                    }
-                })
-            }
-        } else {
-            items.push({})
+        let nodesView = [];
+        var nc = 0;
+        let imageFlag = {
+            personId: 'https://img.icons8.com/nolan/64/000000/person-male.png',
+            ExpectedMovement: 'https://img.icons8.com/android/24/000000/airplane-take-off.png',
+            serviceKey: 'https://img.icons8.com/nolan/64/000000/time.png',
         }
-        return items;
-    }
-    function getJson() {
-       /*  const response = await fetch('https://api.myjson.com/bins/fquo4'); */
-        const myJson = JSON.parse(textarea.value);
-        let nodes = [];
-        let links = [];
-        myJson.nodes.forEach((element, index) => {
-            /* let label;
-            if (element.properties.hasOwnProperty('fullName')) {
-                if (element.properties.fullName.length > 0) {
-                    label = element.properties.fullName;
+        let classFlag = {
+            personId: 'Person',
+            arrivalDateTimeMillis: 'Flight',
+            serviceKey: 'Service',
+        }
+        checkImage = (key) => {
+            let imageVal;
+            Object.keys(imageFlag).forEach(val => {
+                if (key.includes(val)) {
+                    imageVal = imageFlag[val];
+                }
+            })
+            return imageVal;
+        }
+        checkHitId = (node) => {
+            let items = [];
+            if (node.properties.hasOwnProperty('hitId')) {
+                if (node.properties.hitId.length > 1) {
+                    items.push({
+                        text: '!',
+                        aspectRatio: 0, //force single line
+                        px: 0, py: -1, x: 0, y: -5,
+                        textStyle: { fillColor: "white" },
+                        backgroundStyle: {
+                            fillColor: "red",
+                            lineColor: "transparent",
+                        }
+                    })
                 }
             } else {
-
-                label = element.label.slice('movementSegments'.length);
-            } */
-            nodes.push({
-                id: index,
-                style: {
-                    label: element.identity.givenName,
-                    /* image: checkImage(element.key),
-                    items: checkHitId(element), */
-                },
-                details: {
-                    value: element.value,
-                    label: element.identity.givenName,
-                    /* weight: element.weight,
-                    connectionNode: element.connectionNode, */
-                    key: element.key
-                },
-                loaded: true
-            })
-        });
-        nodesView.push(...nodes);
-        myJson.personConnections.forEach((element, index) => {
-            links.push({
-                id: `l${index}`,
-                from: element.source,
-                to: element.target,
-                details: {
-                   /*  key: element.key,
-                    relationship: element.relationshipCode,
-                    score: element.score, */
-                }
-            })
-        })
-
-        nc = new NetChart({
-            container: document.getElementById("netchart"),
-            area: { height: 500 },
-            advanced: {
-                crossOriginHeader: 'anonymous',
-                assets: ['https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css']
-            },
-            data: {
-                preloaded: {
-                    nodes: nodes,
-                    links: links
-                }
-            },
-            info: {
-                enabled: false,
-            },
-            toolbar: {
-                export: true,
-                exportOptions: ['jpg']
-            },
-            interaction: { selection: { lockNodesOnMove: true } }
-        });
-    }
-    getJson();
-    }
+                items.push({})
+            }
+            return items;
+        }
+        function getJson() {
+            /*  const response = await fetch('https://api.myjson.com/bins/fquo4'); */
+            const myJson = JSON.parse(textarea.value);
+            let nodes = [];
+            let links = [];
+            myJson.nodes.forEach((element, index) => {
+                /* let label;
+                if (element.properties.hasOwnProperty('fullName')) {
+                    if (element.properties.fullName.length > 0) {
+                        label = element.properties.fullName;
+                    }
+                } else {
     
+                    label = element.label.slice('movementSegments'.length);
+                } */
+                nodes.push({
+                    id: index,
+                    style: {
+                        label: element.identity.givenName,
+                        image: 'https://img.icons8.com/nolan/64/000000/person-male.png'
+                        /* image: checkImage(element.key),
+                        items: checkHitId(element), */
+                    },
+                    details: {
+                        value: element.value,
+                        label: element.identity.givenName,
+                        /* weight: element.weight,
+                        connectionNode: element.connectionNode, */
+                        key: element.key
+                    },
+                    loaded: true
+                })
+            });
+            nodesView.push(...nodes);
+            myJson.personConnections.forEach((element, index) => {
+                links.push({
+                    id: `l${index}`,
+                    from: element.source,
+                    to: element.target,
+                    details: {
+                        events: element.eventsSummaryCounts
+                        /*  key: element.key,
+                         relationship: element.relationshipCode,
+                         score: element.score, */
+                    }
+                })
+            })
+
+            nc = new NetChart({
+                container: document.getElementById("netchart"),
+                area: { height: 500 },
+                advanced: {
+                    crossOriginHeader: 'anonymous',
+                    assets: ['https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css']
+                },
+                data: {
+                    preloaded: {
+                        nodes: nodes,
+                        links: links
+                    }
+                },
+                info: {
+                    enabled: false,
+                },
+                toolbar: {
+                    export: true,
+                    exportOptions: ['jpg']
+                },
+                style: {
+                    linkStyleFunction: linkStyle
+                },
+                interaction: { selection: { lockNodesOnMove: true } },
+                layout:{
+                    nodeSpacing: 100
+                }
+            });
+        }
+        getJson();
+        function addImage(key) {
+            let imageVal;
+            Object.keys(imageFlag).forEach(val => {
+                if (key.includes(val)) {
+                    imageVal = imageFlag[val];
+                }
+            })
+            return imageVal;
+        }
+        function linkStyle(link) {
+            let imgData = Object.entries(link.data.details.events);
+            let dist = -1;
+            let items = [];
+            imgData.forEach((key) => {   
+                let distance = parseFloat(1/imgData.length) + parseFloat(dist);
+                dist = parseFloat(distance).toFixed(4);           
+                let imageObj = {
+                    image: addImage(key[0]),
+                    px: parseFloat(distance).toFixed(4),
+                    py: 0,
+                    lx: 8,
+                    ly: 0,
+                    text: key[1].toString(),
+                    textStyle: {
+                        fillColor: "black"
+                    }
+                }
+                items.push(imageObj);
+
+            });
+            link.items = items;
+        }
+    }
+
 
 
 </script>
