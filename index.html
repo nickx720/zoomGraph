@@ -60,6 +60,8 @@
             personId: 'https://img.icons8.com/nolan/64/000000/person-male.png',
             ExpectedMovement: 'https://img.icons8.com/android/24/000000/airplane-take-off.png',
             serviceKey: 'https://img.icons8.com/nolan/64/000000/time.png',
+            STAYED_IN_HOTEL: 'https://img.icons8.com/metro/26/000000/5-star-hotel.png',
+            PAID_WITH_CARD: 'https://img.icons8.com/metro/26/000000/no-credit-cards.png',
         }
         let classFlag = {
             personId: 'Person',
@@ -100,7 +102,7 @@
             const myJson = JSON.parse(textarea.value);
             let nodes = [];
             let links = [];
-            myJson.nodes.forEach((element, index) => {
+            myJson.canonicalGraph.nodes.forEach((element, index) => {
                 /* let label;
                 if (element.properties.hasOwnProperty('fullName')) {
                     if (element.properties.fullName.length > 0) {
@@ -113,36 +115,33 @@
                 nodes.push({
                     id: index,
                     style: {
-                        label: element.identity.givenName,
+                        label: element.value,
                         image: 'https://img.icons8.com/nolan/64/000000/person-male.png'
                         /* image: checkImage(element.key),
                         items: checkHitId(element), */
                     },
                     details: {
-                        value: element.value,
-                        label: element.identity.givenName,
-                        /* weight: element.weight,
-                        connectionNode: element.connectionNode, */
-                        key: element.key
+                        label: element.name
                     },
                     loaded: true
                 })
             });
             nodesView.push(...nodes);
-            myJson.personConnections.forEach((element, index) => {
+            myJson.canonicalGraph.consolidatedConnections.forEach((element, index) => {
                 links.push({
                     id: `l${index}`,
                     from: element.source,
                     to: element.target,
                     details: {
-                        events: element.eventsSummaryCounts
+                        events: element.score,
+                        connectionProps: element.connectionProps
                         /*  key: element.key,
                          relationship: element.relationshipCode,
                          score: element.score, */
                     }
                 })
             })
-
+            console.log(nodesView);
             nc = new NetChart({
                 container: document.getElementById("netchart"),
                 area: { height: 500 },
@@ -157,17 +156,28 @@
                     }
                 },
                 info: {
-                    enabled: false,
+                    enabled: true,
+                    linkContentsFunction: function (itemData, item) {
+                        return `
+<div class="notification is-primary">
+${itemData.details.connectionProps.map((itemDisp,idx)=> `
+    <p>Score: ${itemDisp.score}</p>
+    <p>Relationship Code: ${itemDisp.relationshipCode}</p>
+    <p>Relationship Values: ${itemDisp.relationshipValues}</p>
+`)}
+</div>
+                        `
+                    }
+                },
+                style: {
+                    linkStyleFunction: linkStyle
                 },
                 toolbar: {
                     export: true,
                     exportOptions: ['jpg']
                 },
-                style: {
-                    linkStyleFunction: linkStyle
-                },
                 interaction: { selection: { lockNodesOnMove: true } },
-                layout:{
+                layout: {
                     nodeSpacing: 100
                 }
             });
@@ -183,22 +193,19 @@
             return imageVal;
         }
         function linkStyle(link) {
-            let imgData = Object.entries(link.data.details.events);
+            let imgData = Object.entries(link.data.details.connectionProps);
+            console.log(link.data.details.connectionProps);
             let dist = -1;
             let items = [];
-            imgData.forEach((key) => {   
+            link.data.details.connectionProps.forEach((key) => {   
                 let distance = parseFloat(1/imgData.length) + parseFloat(dist);
                 dist = parseFloat(distance).toFixed(4);           
                 let imageObj = {
-                    image: addImage(key[0]),
+                    image: addImage(key.relationshipCode),
                     px: parseFloat(distance).toFixed(4),
                     py: 0,
                     lx: 8,
                     ly: 0,
-                    text: key[1].toString(),
-                    textStyle: {
-                        fillColor: "black"
-                    }
                 }
                 items.push(imageObj);
 

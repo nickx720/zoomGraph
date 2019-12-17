@@ -145,7 +145,16 @@
              }
           ],
           "eventsSummaryCounts":{
-             "ExpectedMovement":2
+             "ExpectedMovement":2,
+               "hotelKey": 2,
+               "creditCard": 3,
+               "agent": 4,
+               "sample": 5,
+               "sample1": 5,
+               "sample2": 5,
+               "sample3": 5,
+               "sample4": 5,
+               "sample5": 5
           },
           "identifier":"01"
        },
