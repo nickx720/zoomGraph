@@ -58,7 +58,7 @@
         var nc = 0;
         let imageFlag = {
             personId: 'https://img.icons8.com/nolan/64/000000/person-male.png',
-            ExpectedMovement: 'https://img.icons8.com/android/24/000000/airplane-take-off.png',
+            HAS_FLIGHT: 'https://img.icons8.com/android/24/000000/airplane-take-off.png',
             serviceKey: 'https://img.icons8.com/nolan/64/000000/time.png',
         }
         let classFlag = {
@@ -94,6 +94,17 @@
                 items.push({})
             }
             return items;
+        }
+        checkCount = (item) => {
+            let objectDetails = {};
+            item.forEach(ele =>{
+                if(ele.relationshipCode in objectDetails){
+                    objectDetails[ele.relationshipCode] = objectDetails[ele.relationshipCode] +1;
+                } else {
+                    objectDetails[ele.relationshipCode] = 1;
+                }
+            })
+           return objectDetails;
         }
         function getJson() {
             /*  const response = await fetch('https://api.myjson.com/bins/fquo4'); */
@@ -135,7 +146,8 @@
                     from: element.source,
                     to: element.target,
                     details: {
-                        events: element.eventsSummaryCounts
+                        events: element.eventsSummaryCounts,
+                        countDisplay: checkCount(element.eventsMetadata)
                         /*  key: element.key,
                          relationship: element.relationshipCode,
                          score: element.score, */
@@ -183,7 +195,7 @@
             return imageVal;
         }
         function linkStyle(link) {
-            let imgData = Object.entries(link.data.details.events);
+            let imgData = Object.entries(link.data.details.countDisplay);
             let dist = -1;
             let items = [];
             imgData.forEach((key) => {   
